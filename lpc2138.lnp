@@ -1,0 +1,4 @@
+--cpu ARM7TDMI "startup.o" "mian.o" "targetinit.o" "os_core.o" "os_dbg_r.o" "os_flag.o" "os_mbox.o" "os_mem.o" "os_mutex.o" "os_q.o" "os_sem.o" "os_task.o" "os_time.o" "os_tmr.o" "os_cpu_a.o" "os_cpu_c.o" --strict --scatter "lpc2138.sct" 
+--autoat --summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\lpc2138.map" -o "lpc2138.axf"

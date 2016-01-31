@@ -1,0 +1,465 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ;title Start.s
+    2 00000000         ;×÷Õß£ºÀîÃ¯
+    3 00000000         ;ÈÕÆÚ£º2012Äê12ÔÂ15ÈÕ
+    4 00000000         ;ÃèÊö£º
+    5 00000000         
+    6 00000000                 PRESERVE8
+    7 00000000                 AREA             vector,CODE,READONLY
+    8 00000000                 ARM
+    9 00000000                 ENTRY
+   10 00000000         ;ÖÐ¶ÏÏòÁ¿±í
+   11 00000000                 IMPORT           SWIHandler
+   12 00000000         Reset
+   13 00000000 E59FF018        LDR              PC, ResetAddr ;³ÌÐòµÄÈë¿Ú£¬
+   14 00000004 E59FF018        LDR              PC, UndefinedAddr
+   15 00000008 E59FF018        LDR              PC, SWI_Addr
+   16 0000000C E59FF018        LDR              PC, PrefetchAddr
+   17 00000010 E59FF018        LDR              PC, DataAbortAddr
+   18 00000014 B9205F80        DCD              0xb9205f80  ;IRQÖÐ¶ÏÌø×ª£¬ÓÉÐ¾Æ
+                                                            ¬Ìá¹©ÉÌ¾ö¶¨Ìø×ªµØÖ·
+                                                            
+   19 00000018 E51FFFF0        LDR              PC, [PC, #-0xff0]
+   20 0000001C E59FF010        LDR              PC, FIQ_Add
+   21 00000020         
+   22 00000020 00000000 
+                       ResetAddr
+                               DCD              ResetInit
+   23 00000024 00000000 
+                       UndefinedAddr
+                               DCD              UndefinedHandler
+   24 00000028 00000000 
+                       SWI_Addr
+                               DCD              SWIHandler
+   25 0000002C 00000000 
+                       PrefetchAddr
+                               DCD              PrefetchHandler
+   26 00000030 00000000 
+                       DataAbortAddr
+                               DCD              DataAbortHandler
+   27 00000034 00000000 
+                       FIQ_Add DCD              FIQHandler
+   28 00000038         
+   29 00000038         
+   30 00000038         
+   31 00000038         ResetInit                            ;¸´Î»ºóÖ´ÐÐ
+   32 00000038                 IMPORT           TargetInit
+   33 00000038                 IMPORT           __main
+   34 00000038         
+   35 00000038         
+   36 00000038 EB000002        BL               InitStack   ;³õÊ¼»¯¶ÑÕ»
+   37 0000003C         
+   38 0000003C EBFFFFFE        BL               TargetInit  ;³õÊ¼»¯¸÷ÖÖ¶ÑÕ»
+   39 00000040 E59F0058        LDR              R0,   =__main
+   40 00000044 E12FFF10        BX               R0          ;Ìø×ªµ½ÓÃ»§³ÌÐò
+   41 00000048         
+   42 00000048         
+   43 00000048         InitStack                            ;ÉèÖÃ¸÷ÖÖÄ£Ê½µÄ¶ÑÕ»
+                                                            
+   44 00000048 E1A0000E        MOV              R0    ,LR   ;SVCÄ£Ê½ÏÂµÄ¶ÑÕ»¶¥
+   45 0000004C E59FD0BC        LDR              SP    ,SVCSTACKSPACE +(SVC_STAC
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+K_LEGTH-1)*4
+   46 00000050         
+   47 00000050 E321F0D2        MSR              CPSR_c, #0xd2 ;IRQÖÐ¶ÏÄ£Ê½
+   48 00000054 E59FD114        LDR              SP, IRQSTACKSPACE + (IRQ_STACK_
+LEGTH - 1)* 4 
+                                                            ;Ö¸Ïò¶ÑÕ»Õ»¶¥
+   49 00000058         
+   50 00000058 E321F0D1        MSR              CPSR_c, #0xd1 ;ÉèÖÃ¿ìËÙÖÐ¶ÏÄ£Ê½
+                                                            ¶ÑÕ»
+   51 0000005C E51FD00C        LDR              SP, FIQSTACKSPACE + (FIQ_STACK_
+LEGTH - 1)* 4
+   52 00000060         
+   53 00000060 E321F0D7        MSR              CPSR_c, #0xd7 ;ÉèÖÃÖÐÖ¹Ä£Ê½¶ÑÕ»
+                                                            
+   54 00000064 E51FD00C        LDR              SP, ABTSTACKSPACE + (ABT_STACK_
+LEGTH - 1)* 4
+   55 00000068         
+   56 00000068 E321F0DB        MSR              CPSR_c, #0xdb 
+                                                            ;ÉèÖÃÎ´¶¨ÒåÄ£Ê½¶ÑÕ»
+                                                            
+   57 0000006C E51FD00C        LDR              SP, UNDSTACKSPACE + (UND_STACK_
+LEGTH - 1)* 4
+   58 00000070         
+   59 00000070 E321F0DF        MSR              CPSR_c, #0xdf ;ÉèÖÃÏµÍ³Ä£Ê½¶ÑÕ»
+                                                            
+   60 00000074 E59FD0BC        LDR              SP, USRSTACKSPACE + (USR_STACK_
+LEGTH - 1)* 4
+   61 00000078         
+   62 00000078 E321F00D        MSR              CPSR_c, #0Xd
+   63 0000007C         
+   64 0000007C E1A0E000        MOV              LR    ,R0
+   65 00000080 E1A0F00E        MOV              PC    ,LR   ;·µ»Øµ½TargetInit´¦
+                                                            
+   66 00000084         
+   67 00000084         
+   68 00000084         UndefinedHandler                     ;ÆäËûÔÝÊ±²»»áÓÃµ½µÄ
+                                                            Òì³£Ä£Ê½
+   69 00000084 EAFFFFFE        B                .
+   70 00000088         PrefetchHandler
+   71 00000088 EAFFFFFE        B                .
+   72 0000008C         DataAbortHandler
+   73 0000008C EAFFFFFE        B                .
+   74 00000090         FIQHandler                           ;¿ìËÙÖÐ¶ÏÄ£Ê½
+   75 00000090 E1A0800E        MOV              R8    ,LR   ;±£´æ·µ»ØµØÖ·
+   76 00000094 EB000000        BL               FIQInterrupt ;Ìø×ªµ½ÖÐ¶Ï´¦Àí³ÌÐ
+                                                            ò 
+   77 00000098 E1A0F008        MOV              PC    ,R8   ;ÖÐ¶Ï·µ»Ø
+   78 0000009C         FIQInterrupt
+   79 0000009C EAFFFFFE        b                .
+   80 000000A0         
+   81 000000A0         
+   82 000000A0         
+   83 000000A0         
+   84 000000A0         
+   85 000000A0         ;¶¨Òå¶ÑÕ»µÄ´óÐ¡£¬ÎªÉÏÃæµÄ¶ÑÕ»³õÊ¼»¯×öºÃ×¼±¸
+   86 000000A0 00000000 
+                       FIQ_STACK_LEGTH
+                               EQU              0
+   87 000000A0 00000048 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+                       IRQ_STACK_LEGTH
+                               EQU              9*8         ;Ã¿²ãÇ¶Ì×ÐèÒª9¸ö×Ö¶
+                                                            ÑÕ»£¬ÔÊÐí8²ãÇ¶Ì×
+   88 000000A0 00000000 
+                       ABT_STACK_LEGTH
+                               EQU              0
+   89 000000A0 00000000 
+                       UND_STACK_LEGTH
+                               EQU              0
+   90 000000A0 00000032 
+                       USR_STACK_LEGTH
+                               EQU              10*5
+   91 000000A0 00000032 
+                       SVC_STACK_LEGTH
+                               EQU              50
+   92 000000A0         ;¶¨Òå¶ÑÕ»¿Õ¼ä
+   93 000000A0 00000000        AREA             stack,DATA,NOINIT,ALIGN=2
+   94 00000000         IRQSTACKSPACE
+                               SPACE            IRQ_STACK_LEGTH*4
+   95 00000120         FIQSTACKSPACE
+                               SPACE            FIQ_STACK_LEGTH*4
+   96 00000120         ABTSTACKSPACE
+                               SPACE            FIQ_STACK_LEGTH*4
+   97 00000120         UNDSTACKSPACE
+                               SPACE            UND_STACK_LEGTH*4
+   98 00000120         USRSTACKSPACE
+                               SPACE            UND_STACK_LEGTH*4
+   99 00000120         SVCSTACKSPACE
+                               SPACE            SVC_STACK_LEGTH*4
+  100 000001E8         
+  101 000001E8                 END
+Command Line: --debug --xref --apcs=interwork --depend=LpcStart.d -oLpcStart.o 
+-I"D:\Program Files\Keil\ARM\INC" -I"D:\Program Files\Keil\ARM\INC\Philips" --l
+ist=.\LpcStart.lst USR\LpcStart.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+DataAbortAddr 00000030
+
+Symbol: DataAbortAddr
+   Definitions
+      At line 26 in file USR\LpcStart.s
+   Uses
+      At line 17 in file USR\LpcStart.s
+Comment: DataAbortAddr used once
+DataAbortHandler 0000008C
+
+Symbol: DataAbortHandler
+   Definitions
+      At line 72 in file USR\LpcStart.s
+   Uses
+      At line 26 in file USR\LpcStart.s
+Comment: DataAbortHandler used once
+FIQHandler 00000090
+
+Symbol: FIQHandler
+   Definitions
+      At line 74 in file USR\LpcStart.s
+   Uses
+      At line 27 in file USR\LpcStart.s
+Comment: FIQHandler used once
+FIQInterrupt 0000009C
+
+Symbol: FIQInterrupt
+   Definitions
+      At line 78 in file USR\LpcStart.s
+   Uses
+      At line 76 in file USR\LpcStart.s
+Comment: FIQInterrupt used once
+FIQ_Add 00000034
+
+Symbol: FIQ_Add
+   Definitions
+      At line 27 in file USR\LpcStart.s
+   Uses
+      At line 20 in file USR\LpcStart.s
+Comment: FIQ_Add used once
+InitStack 00000048
+
+Symbol: InitStack
+   Definitions
+      At line 43 in file USR\LpcStart.s
+   Uses
+      At line 36 in file USR\LpcStart.s
+Comment: InitStack used once
+PrefetchAddr 0000002C
+
+Symbol: PrefetchAddr
+   Definitions
+      At line 25 in file USR\LpcStart.s
+   Uses
+      At line 16 in file USR\LpcStart.s
+Comment: PrefetchAddr used once
+PrefetchHandler 00000088
+
+Symbol: PrefetchHandler
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 70 in file USR\LpcStart.s
+   Uses
+      At line 25 in file USR\LpcStart.s
+Comment: PrefetchHandler used once
+Reset 00000000
+
+Symbol: Reset
+   Definitions
+      At line 12 in file USR\LpcStart.s
+   Uses
+      None
+Comment: Reset unused
+ResetAddr 00000020
+
+Symbol: ResetAddr
+   Definitions
+      At line 22 in file USR\LpcStart.s
+   Uses
+      At line 13 in file USR\LpcStart.s
+Comment: ResetAddr used once
+ResetInit 00000038
+
+Symbol: ResetInit
+   Definitions
+      At line 31 in file USR\LpcStart.s
+   Uses
+      At line 22 in file USR\LpcStart.s
+Comment: ResetInit used once
+SWI_Addr 00000028
+
+Symbol: SWI_Addr
+   Definitions
+      At line 24 in file USR\LpcStart.s
+   Uses
+      At line 15 in file USR\LpcStart.s
+Comment: SWI_Addr used once
+UndefinedAddr 00000024
+
+Symbol: UndefinedAddr
+   Definitions
+      At line 23 in file USR\LpcStart.s
+   Uses
+      At line 14 in file USR\LpcStart.s
+Comment: UndefinedAddr used once
+UndefinedHandler 00000084
+
+Symbol: UndefinedHandler
+   Definitions
+      At line 68 in file USR\LpcStart.s
+   Uses
+      At line 23 in file USR\LpcStart.s
+Comment: UndefinedHandler used once
+vector 00000000
+
+Symbol: vector
+   Definitions
+      At line 7 in file USR\LpcStart.s
+   Uses
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+      None
+Comment: vector unused
+15 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+ABTSTACKSPACE 00000120
+
+Symbol: ABTSTACKSPACE
+   Definitions
+      At line 96 in file USR\LpcStart.s
+   Uses
+      At line 54 in file USR\LpcStart.s
+Comment: ABTSTACKSPACE used once
+FIQSTACKSPACE 00000120
+
+Symbol: FIQSTACKSPACE
+   Definitions
+      At line 95 in file USR\LpcStart.s
+   Uses
+      At line 51 in file USR\LpcStart.s
+Comment: FIQSTACKSPACE used once
+IRQSTACKSPACE 00000000
+
+Symbol: IRQSTACKSPACE
+   Definitions
+      At line 94 in file USR\LpcStart.s
+   Uses
+      At line 48 in file USR\LpcStart.s
+Comment: IRQSTACKSPACE used once
+SVCSTACKSPACE 00000120
+
+Symbol: SVCSTACKSPACE
+   Definitions
+      At line 99 in file USR\LpcStart.s
+   Uses
+      At line 45 in file USR\LpcStart.s
+Comment: SVCSTACKSPACE used once
+UNDSTACKSPACE 00000120
+
+Symbol: UNDSTACKSPACE
+   Definitions
+      At line 97 in file USR\LpcStart.s
+   Uses
+      At line 57 in file USR\LpcStart.s
+Comment: UNDSTACKSPACE used once
+USRSTACKSPACE 00000120
+
+Symbol: USRSTACKSPACE
+   Definitions
+      At line 98 in file USR\LpcStart.s
+   Uses
+      At line 60 in file USR\LpcStart.s
+Comment: USRSTACKSPACE used once
+stack 00000000
+
+Symbol: stack
+   Definitions
+      At line 93 in file USR\LpcStart.s
+   Uses
+      None
+Comment: stack unused
+7 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Absolute symbols
+
+ABT_STACK_LEGTH 00000000
+
+Symbol: ABT_STACK_LEGTH
+   Definitions
+      At line 88 in file USR\LpcStart.s
+   Uses
+      At line 54 in file USR\LpcStart.s
+Comment: ABT_STACK_LEGTH used once
+FIQ_STACK_LEGTH 00000000
+
+Symbol: FIQ_STACK_LEGTH
+   Definitions
+      At line 86 in file USR\LpcStart.s
+   Uses
+      At line 51 in file USR\LpcStart.s
+      At line 95 in file USR\LpcStart.s
+      At line 96 in file USR\LpcStart.s
+
+IRQ_STACK_LEGTH 00000048
+
+Symbol: IRQ_STACK_LEGTH
+   Definitions
+      At line 87 in file USR\LpcStart.s
+   Uses
+      At line 48 in file USR\LpcStart.s
+      At line 94 in file USR\LpcStart.s
+
+SVC_STACK_LEGTH 00000032
+
+Symbol: SVC_STACK_LEGTH
+   Definitions
+      At line 91 in file USR\LpcStart.s
+   Uses
+      At line 45 in file USR\LpcStart.s
+      At line 99 in file USR\LpcStart.s
+
+UND_STACK_LEGTH 00000000
+
+Symbol: UND_STACK_LEGTH
+   Definitions
+      At line 89 in file USR\LpcStart.s
+   Uses
+      At line 57 in file USR\LpcStart.s
+      At line 97 in file USR\LpcStart.s
+      At line 98 in file USR\LpcStart.s
+
+USR_STACK_LEGTH 00000032
+
+Symbol: USR_STACK_LEGTH
+   Definitions
+      At line 90 in file USR\LpcStart.s
+   Uses
+      At line 60 in file USR\LpcStart.s
+Comment: USR_STACK_LEGTH used once
+6 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+SWIHandler 00000000
+
+Symbol: SWIHandler
+   Definitions
+      At line 11 in file USR\LpcStart.s
+   Uses
+      At line 24 in file USR\LpcStart.s
+Comment: SWIHandler used once
+TargetInit 00000000
+
+Symbol: TargetInit
+   Definitions
+      At line 32 in file USR\LpcStart.s
+   Uses
+      At line 38 in file USR\LpcStart.s
+Comment: TargetInit used once
+__main 00000000
+
+Symbol: __main
+   Definitions
+      At line 33 in file USR\LpcStart.s
+   Uses
+      At line 39 in file USR\LpcStart.s
+Comment: __main used once
+3 symbols
+357 symbols in table

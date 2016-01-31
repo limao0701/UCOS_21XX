@@ -1,0 +1,4 @@
+--cpu ARM7TDMI ".\out\startup.o" ".\out\mian.o" ".\out\targetinit.o" ".\out\os_core.o" ".\out\os_dbg_r.o" ".\out\os_flag.o" ".\out\os_mbox.o" ".\out\os_mem.o" ".\out\os_mutex.o" ".\out\os_q.o" ".\out\os_sem.o" ".\out\os_task.o" ".\out\os_time.o" ".\out\os_tmr.o" ".\out\os_cpu_a.o" ".\out\os_cpu_c.o" --strict --scatter ".\OUT\lpc2138.sct" 
+--autoat --summary_stderr --info summarysizes --map --xref --callgraph --symbols 
+--info sizes --info totals --info unused --info veneers 
+ --list ".\LIST\lpc2138.map" -o ".\OUT\lpc2138.axf"
